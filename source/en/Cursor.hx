@@ -88,25 +88,18 @@ class Cursor extends FlxSprite
 	function CanMove(_directionPressed:Bool):Bool // Checks if it's in bounds to move in the given direction
 	{
 		if (_directionPressed == FlxG.keys.anyPressed([LEFT]))
-			if (colLeft > 1)
+			if (colLeft > 0)
 				return true;
 		if (_directionPressed == FlxG.keys.anyPressed([RIGHT]))
-			if (colRight < 6)
+			if (colRight < 5)
 				return true;
 		if (_directionPressed == FlxG.keys.anyPressed([DOWN]))
 			if (row > 1)
 				return true;
 
-		if (_directionPressed == FlxG.keys.anyPressed([UP])) // Will only be able to move to the highest position of a block
+		if (_directionPressed == FlxG.keys.anyPressed([UP]))
 		{
-			var highestRow:Int = 0;
-			for (block in blocks)
-			{
-				if (block.row > highestRow)
-					highestRow = block.row;
-			}
-
-			if (row < highestRow)
+			if (row < 13)
 				return true;
 		}
 
@@ -122,23 +115,31 @@ class Cursor extends FlxSprite
 
 		if (pressed && canPress)
 		{
-			for (block in blocks)
-			{
-				if (block.row == row && block.col == colLeft)
-				{
-					leftBlock = block;
-				}
-				else if (block.row == row && block.col == colRight)
-				{
-					rightBlock = block;
-				}
-			}
+			leftBlock = blocks.grid[colLeft][row];
+			rightBlock = blocks.grid[colRight][row];
 
 			if (leftBlock != null)
+			{
+				trace("Left: " + leftBlock.selectedColor);
 				leftBlock.Swap(1);
-			if (rightBlock != null)
-				rightBlock.Swap(-1);
+				blocks.grid[colRight][row] = leftBlock;
+			}
+			else
+			{
+				blocks.grid[colRight][row] = null;
+			}
 
+			if (rightBlock != null)
+			{
+				trace("Right: " + rightBlock.selectedColor);
+				rightBlock.Swap(-1);
+				blocks.grid[colLeft][row] = rightBlock;
+			}
+			else
+			{
+				blocks.grid[colLeft][row] = null;
+			}
+			trace("--------");
 			canPress = false;
 		}
 
@@ -148,15 +149,10 @@ class Cursor extends FlxSprite
 
 	function SetInitalPosition()
 	{
-		for (block in blocks)
-		{
-			if (block.col == 3 && block.row == 3)
-			{
-				setPosition(block.x - xPosModifier, block.y - yPosModifier);
-				colLeft = 3;
-				colRight = 4;
-				row = 3;
-			}
-		}
+		var startingBlock:Block = blocks.grid[2][3];
+		setPosition(startingBlock.x - xPosModifier, startingBlock.y - yPosModifier);
+		colLeft = 2;
+		colRight = 3;
+		row = 3;
 	}
 }

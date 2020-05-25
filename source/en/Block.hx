@@ -22,18 +22,16 @@ class Block extends FlxSprite
 	public var col:Int = 0;
 	public var selectedColor:Color;
 
-	var blocks:FlxTypedGroup<Block>;
+	var blocks:Blocks;
 	var fallSpeed:Float = 50;
 	var isFalling:Bool = false;
 
 	var random:FlxRandom;
 	var tween:FlxTween;
 
-	public function new(x:Float, y:Float, _row:Int, _col:Int, _random:FlxRandom, _blocks:FlxTypedGroup<Block>)
+	public function new(x:Float, y:Float, _row:Int, _col:Int, _random:FlxRandom, _blocks:Blocks)
 	{
 		super(x, y);
-
-		solid = true;
 
 		random = _random;
 		blocks = _blocks;
@@ -50,7 +48,7 @@ class Block extends FlxSprite
 	public function Swap(_moveDirection:Int)
 	{
 		col += _moveDirection;
-		solid = false;
+
 		tween = FlxTween.tween(this, {x: x + (_moveDirection * 16)}, 0.2,
 			{onComplete: _onSwapped.bind(_, _moveDirection)}); // underscore is used for function binding
 	}
@@ -63,21 +61,16 @@ class Block extends FlxSprite
 		{
 			Fall();
 		}
-
+		blocks.CheckForMatches(this);
 		FallAboveBlocks(_moveDirection);
 	}
 
 	function CanFall(_rowToFall:Int, _colToCheck:Int):Bool
 	{
-		for (block in blocks)
-		{
-			if (block.col == _colToCheck && block.row == _rowToFall)
-			{
-				return false;
-			}
-		}
-
-		return true;
+		if (blocks.grid[_colToCheck][_rowToFall] != null)
+			return false
+		else
+			return true;
 	}
 
 	function Fall()
@@ -100,9 +93,13 @@ class Block extends FlxSprite
 			}
 		}
 
+		blocks.grid[col][row] = null; // null out the original spot for the block so it won't be referenced here in grid
+
 		fallTime = 0.1 * fallDistance;
 		row -= fallDistance;
 		tween = FlxTween.tween(this, {y: y + (fallDistance * 16)}, fallTime);
+
+		blocks.grid[col][row] = this; // make reference of this block in the new fallen location
 	}
 
 	function FallAboveBlocks(_moveDirection:Int)
@@ -115,22 +112,22 @@ class Block extends FlxSprite
 
 		while (isSearchingForHigherBlocks)
 		{
-			for (block in blocks)
+			if (blocks.grid[colToCheck][rowToCheck] != null) // There is a block above so check to see if it can fall
 			{
-				if (block.row == rowToCheck && block.col == colToCheck) // There is a block above so check to see if it can fall
+				var blockToFall:Block = blocks.grid[colToCheck][rowToCheck];
+				if (CanFall(rowToCheck - 1, colToCheck))
 				{
-					if (CanFall(rowToCheck - 1, colToCheck))
-					{
-						tween = FlxTween.tween(block, {y: block.y + 16}, 0.1);
-						block.row--;
-						dropDistance++;
-					}
-					rowToCheck++;
+					blocks.grid[colToCheck][rowToCheck] = null; // As with normal fall, old spot needs to be nulled out
+					tween = FlxTween.tween(blockToFall, {y: blockToFall.y + 16}, 0.1);
+					blockToFall.row--;
+					dropDistance++;
+					blocks.grid[colToCheck][rowToCheck - 1] = blockToFall; // Set the new spot in the grid as the blockToFall
 				}
-				else if (block.row != rowToCheck && block.col == colToCheck)
-				{
-					isSearchingForHigherBlocks = false;
-				}
+				rowToCheck++;
+			}
+			else if (blocks.grid[colToCheck][rowToCheck] == null) // No more blocks above, so stop the loop
+			{
+				isSearchingForHigherBlocks = false;
 			}
 		}
 	}
