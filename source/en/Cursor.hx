@@ -120,7 +120,6 @@ class Cursor extends FlxSprite
 
 			if (leftBlock != null)
 			{
-				trace("Left: " + leftBlock.selectedColor);
 				leftBlock.Swap(1);
 				blocks.grid[colRight][row] = leftBlock;
 			}
@@ -131,7 +130,6 @@ class Cursor extends FlxSprite
 
 			if (rightBlock != null)
 			{
-				trace("Right: " + rightBlock.selectedColor);
 				rightBlock.Swap(-1);
 				blocks.grid[colLeft][row] = rightBlock;
 			}
@@ -139,7 +137,7 @@ class Cursor extends FlxSprite
 			{
 				blocks.grid[colLeft][row] = null;
 			}
-			trace("--------");
+
 			canPress = false;
 		}
 

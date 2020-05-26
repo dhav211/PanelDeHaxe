@@ -89,16 +89,22 @@ class Blocks extends FlxTypedGroup<Block>
 
 		if (verticalMatches.length > 1 || horizonalMatches.length > 1)
 		{
-			_originBlock.color = FlxColor.GRAY;
+			_originBlock.kill();
 
-			for (match in verticalMatches)
+			if (verticalMatches.length > 1)
 			{
-				match.color = FlxColor.GRAY;
+				for (match in verticalMatches)
+				{
+					match.kill();
+				}
 			}
 
-			for (match in horizonalMatches)
+			if (horizonalMatches.length > 1)
 			{
-				match.color = FlxColor.GRAY;
+				for (match in horizonalMatches)
+				{
+					match.kill();
+				}
 			}
 		}
 	}
@@ -116,12 +122,12 @@ class Blocks extends FlxTypedGroup<Block>
 				&& grid[_originBlock.col + (distanceToCheck * _colDirection)][_originBlock.row + (distanceToCheck * _rowDirection)] != null)
 				blockToCheck = grid[_originBlock.col + (distanceToCheck * _colDirection)][_originBlock.row + (distanceToCheck * _rowDirection)];
 
-			if (blockToCheck != null && blockToCheck.selectedColor == _originBlock.selectedColor)
+			if (blockToCheck != null && blockToCheck.selectedColor == _originBlock.selectedColor && blockToCheck.row > 0)
 			{
 				blocksFound.push(blockToCheck);
 				distanceToCheck++;
 			}
-			else if (blockToCheck == null || blockToCheck.selectedColor != _originBlock.selectedColor)
+			else if (blockToCheck == null || blockToCheck.selectedColor != _originBlock.selectedColor || blockToCheck.row > 0)
 			{
 				isCheckingForMatches = false;
 			}
