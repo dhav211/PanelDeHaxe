@@ -11,8 +11,8 @@ class Blocks extends FlxTypedGroup<Block>
 {
 	public var grid:Array<Array<Block>> = [];
 
-	final GRID_WIDTH:Int = 6;
-	final GRID_HEIGHT:Int = 14;
+	public final GRID_WIDTH:Int = 6;
+	public final GRID_HEIGHT:Int = 14;
 
 	var speed:Float = 10;
 
@@ -49,6 +49,16 @@ class Blocks extends FlxTypedGroup<Block>
 		}
 
 		super.update(elapsed);
+	}
+
+	public function SetBlockInGrid(_col:Int, _row:Int, _block:Block)
+	{
+		grid[_col][_row] = _block;
+	}
+
+	public function RemoveBlockInGrid(_col:Int, _row:Int)
+	{
+		grid[_col][_row] = null;
 	}
 
 	public function CheckForMatches(_originBlock:Block)
@@ -107,6 +117,26 @@ class Blocks extends FlxTypedGroup<Block>
 				}
 			}
 		}
+	}
+
+	function IsBlockAMatch(_match:Block, _originBlock:Block, _horizontalMatches:Array<Block>, _verticalMatches:Array<Block>):Bool
+	{
+		if (_match == _originBlock)
+			return true;
+
+		for (hMatch in _horizontalMatches)
+		{
+			if (_match == hMatch)
+				return true;
+		}
+
+		for (vMatch in _verticalMatches)
+		{
+			if (_match == vMatch)
+				return true;
+		}
+
+		return false;
 	}
 
 	function CheckInDirectionForMatches(_originBlock:Block, _colDirection:Int, _rowDirection):Array<Block>

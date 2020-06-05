@@ -32,6 +32,28 @@ class Cursor extends FlxSprite
 	{
 		Move();
 		SwapBlocks();
+		GetBlockColors();
+	}
+
+	function GetBlockColors() // Debug
+	{
+		if (FlxG.keys.anyJustPressed([C]) && canPress)
+		{
+			canPress = false;
+
+			if (blocks.grid[colLeft][row] != null)
+				trace("Left: " + blocks.grid[colLeft][row].selectedColor + " at " + colLeft + " - " + row);
+			else
+				trace("Left: NULL " + " at " + colLeft + " - " + row);
+
+			if (blocks.grid[colRight][row] != null)
+				trace("Right: " + blocks.grid[colRight][row].selectedColor + " at " + colRight + " - " + row);
+			else
+				trace("Right: NULL " + " at " + colRight + " - " + row);
+		}
+
+		if (FlxG.keys.anyJustReleased([C]) && !canPress)
+			canPress = true;
 	}
 
 	function Move()
