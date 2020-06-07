@@ -20,6 +20,7 @@ class PlayState extends FlxState
 		blocks.SpawnInitalBlocks();
 
 		cursor = new Cursor(0, 0, blocks);
+		blocks.SetCursor(cursor);
 		add(cursor);
 	}
 

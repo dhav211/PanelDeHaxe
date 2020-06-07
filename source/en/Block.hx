@@ -1,11 +1,13 @@
 package en;
 
+import com.Move;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxRandom;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.util.FlxTimer;
 
 enum Color
@@ -31,6 +33,9 @@ class Block extends FlxSprite
 	var random:FlxRandom;
 	var tween:FlxTween;
 	var deathTimer:FlxTimer = new FlxTimer();
+	var move:MoveCommand;
+
+	var testSignal:FlxTypedSignal<FlxSprite->Void> = new FlxTypedSignal<FlxSprite->Void>();
 
 	public function new(x:Float, y:Float, _row:Int, _col:Int, _random:FlxRandom, _blocks:Blocks)
 	{
@@ -47,6 +52,8 @@ class Block extends FlxSprite
 		animation.add("still", [0], 8, true);
 		animation.add("die", [0, 5, 0, 5, 0, 5, 0, 5, 6], 8, false);
 		animation.play("still");
+
+		testSignal.add(_onTestSignal);
 	}
 
 	public function Swap(_moveDirection:Int)
@@ -195,5 +202,11 @@ class Block extends FlxSprite
 			case YELLOW:
 				return AssetPaths.yellow_blocks__png;
 		}
+	}
+
+	function _onTestSignal(_object:FlxSprite)
+	{
+		trace(_object);
+		trace("signal complete");
 	}
 }

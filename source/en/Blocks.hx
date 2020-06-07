@@ -5,6 +5,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxRandom;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
+import flixel.util.FlxSignal;
 import flixel.util.FlxTimer;
 
 class Blocks extends FlxTypedGroup<Block>
@@ -14,14 +15,17 @@ class Blocks extends FlxTypedGroup<Block>
 	public final GRID_WIDTH:Int = 6;
 	public final GRID_HEIGHT:Int = 14;
 
-	var speed:Float = 10;
+	var speed:Float = 100;
 
 	var currentIncrement:Int = 0;
-	final MAX_INCREMENT:Int = 4;
+	final MAX_INCREMENT:Int = 16;
 
 	var timer:FlxTimer = new FlxTimer();
 	var tween:FlxTween;
 	var random:FlxRandom;
+
+	var moveCursorUp:FlxSignal = new FlxSignal();
+	var increaseCursorRow:FlxSignal = new FlxSignal();
 
 	public function new(_random:FlxRandom)
 	{
@@ -44,6 +48,7 @@ class Blocks extends FlxTypedGroup<Block>
 			{
 				IncreaseBlocksRowCount();
 				SpawnRow();
+				increaseCursorRow.dispatch();
 				currentIncrement = 0;
 			}
 		}
@@ -184,16 +189,29 @@ class Blocks extends FlxTypedGroup<Block>
 	{
 		for (block in this)
 		{
-			tween = FlxTween.tween(block, {x: block.x, y: block.y - 4}, 0.2);
+			block.y -= 1;
 		}
+
+		moveCursorUp.dispatch();
 	}
 
 	function IncreaseBlocksRowCount()
 	{
-		for (block in this)
+		var increasedRowGrid:Array<Array<Block>> = CreateEmptyGrid();
+
+		for (x in 0...GRID_WIDTH)
 		{
-			block.row++;
+			for (y in 0...GRID_HEIGHT)
+			{
+				if (grid[x][y] != null)
+				{
+					grid[x][y].row++;
+					increasedRowGrid[x][y + 1] = grid[x][y];
+				}
+			}
 		}
+
+		grid = increasedRowGrid;
 	}
 
 	public function SpawnRow()
@@ -233,5 +251,11 @@ class Blocks extends FlxTypedGroup<Block>
 		var emptyBlock:Block = null;
 		var tempGrid:Array<Array<Block>> = [for (x in 0...GRID_WIDTH) [for (y in 0...GRID_HEIGHT) emptyBlock]];
 		return tempGrid;
+	}
+
+	public function SetCursor(_cursor:Cursor)
+	{
+		moveCursorUp.add(_cursor._onMoveCursorUp);
+		increaseCursorRow.add(_cursor._onIncreaseCursorRow);
 	}
 }
