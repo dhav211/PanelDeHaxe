@@ -4,6 +4,7 @@ import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.util.FlxSignal;
 import flixel.util.FlxTimer;
+import haxe.Constraints.Function;
 
 enum Direction
 {
@@ -19,13 +20,12 @@ class MoveCommand
 	var distance:Float = 0;
 	var currentDistance:Float = 0;
 	var currentDirection:Direction = UP;
-	var onComplete:FlxTypedSignal<FlxSprite->Void>;
+	var onComplete:Function;
 	var objectToMove:FlxSprite;
 
-	public function new(_objectToMove:FlxSprite, _onComplete:FlxTypedSignal<FlxSprite->Void>)
+	public function new(_objectToMove:FlxSprite)
 	{
 		objectToMove = _objectToMove;
-		onComplete = _onComplete;
 	}
 
 	public function Move(_elapsed:Float)
@@ -35,8 +35,8 @@ class MoveCommand
 
 		if (currentDistance >= distance)
 		{
-			distanceToMove = (currentDistance - distance) - distanceToMove;
-			onComplete.dispatch(objectToMove);
+			distanceToMove = distanceToMove - (currentDistance - distance);
+			onComplete();
 		}
 
 		switch (currentDirection)
@@ -52,11 +52,12 @@ class MoveCommand
 		}
 	}
 
-	public function StartMove(_direction:Direction, _distance:Int, _duration:Float)
+	public function StartMove(_direction:Direction, _distance:Int, _duration:Float, _onComplete:Function)
 	{
-		moveSpeed = 5 / _duration;
+		moveSpeed = 10 / _duration;
 		distance = _distance;
 		currentDirection = _direction;
+		onComplete = _onComplete;
 
 		currentDistance = 0;
 	}

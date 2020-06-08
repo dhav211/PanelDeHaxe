@@ -1,5 +1,6 @@
 package en;
 
+import com.Move.MoveCommand;
 import com.Move;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -9,6 +10,7 @@ import flixel.math.FlxRandom;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.util.FlxTimer;
+import haxe.macro.Expr.Function;
 
 enum Color
 {
@@ -29,13 +31,14 @@ class Block extends FlxSprite
 	var blocks:Blocks;
 	var fallSpeed:Float = 50;
 	var isFalling:Bool = false;
+	var isSwapping:Bool = false;
 
 	var random:FlxRandom;
 	var tween:FlxTween;
 	var deathTimer:FlxTimer = new FlxTimer();
-	var move:MoveCommand;
 
-	var testSignal:FlxTypedSignal<FlxSprite->Void> = new FlxTypedSignal<FlxSprite->Void>();
+	public var fall:MoveCommand;
+	public var swap:MoveCommand;
 
 	public function new(x:Float, y:Float, _row:Int, _col:Int, _random:FlxRandom, _blocks:Blocks)
 	{
@@ -53,15 +56,40 @@ class Block extends FlxSprite
 		animation.add("die", [0, 5, 0, 5, 0, 5, 0, 5, 6], 8, false);
 		animation.play("still");
 
-		testSignal.add(_onTestSignal);
+		swap = new MoveCommand(this);
+		fall = new MoveCommand(this);
+	}
+
+	public override function update(elapsed)
+	{
+		if (isSwapping)
+		{
+			swap.Move(elapsed);
+		}
+
+		if (isFalling)
+		{
+			fall.Move(elapsed);
+		}
+
+		super.update(elapsed);
 	}
 
 	public function Swap(_moveDirection:Int)
 	{
 		col += _moveDirection;
+		isSwapping = true;
+		var direction:Direction = LEFT;
 
-		tween = FlxTween.tween(this, {x: x + (_moveDirection * 16)}, 0.2,
-			{onComplete: _onSwapped.bind(_, _moveDirection)}); // underscore is used for function binding
+		switch (_moveDirection)
+		{
+			case -1:
+				direction = LEFT;
+			case 1:
+				direction = RIGHT;
+		}
+
+		swap.StartMove(direction, 16, 0.2, _onSwapped.bind(_moveDirection));
 	}
 
 	public override function kill()
@@ -73,7 +101,7 @@ class Block extends FlxSprite
 		deathTimer.start(1, _onDeathTimerComplete);
 	}
 
-	function _onSwapped(_tween:FlxTween, _moveDirection:Int)
+	function _onSwapped(_moveDirection:Int)
 	{
 		var originalCol:Int = col + (_moveDirection - (_moveDirection * 2)); // makes a negative value positive, and positive value negative
 		var originalRow:Int = row;
@@ -84,6 +112,8 @@ class Block extends FlxSprite
 		}
 		blocks.CheckForMatches(this);
 		FallAboveBlocks(originalCol, originalRow);
+
+		isSwapping = false;
 	}
 
 	function _onDeathTimerComplete(timer:FlxTimer)
@@ -116,22 +146,25 @@ class Block extends FlxSprite
 		fallTime = 0.1 * fallDistance;
 		_blockToFall.row -= fallDistance;
 
-		_blockToFall.tween = FlxTween.tween(_blockToFall, {y: _blockToFall.y + (fallDistance * 16)}, fallTime,
-			{onComplete: _onFallComplete.bind(_, _blockToFall)});
+		_blockToFall.isFalling = true;
+		_blockToFall.fall.StartMove(DOWN, 16, 0.1, _onFallComplete.bind(_blockToFall));
+
 		blocks.SetBlockInGrid(_blockToFall.col, _blockToFall.row, _blockToFall); // make reference of this block in the new fallen location
 	}
 
-	function _onFallComplete(_tween:FlxTween, _blockToFall:Block)
+	function _onFallComplete(_blockToFall:Block)
 	{
 		if (CanFall(_blockToFall.row - 1, _blockToFall.col))
 			Fall(_blockToFall);
 		else
 		{
+			_blockToFall.isFalling = false;
 			blocks.CheckForMatches(_blockToFall);
 
 			if (_blockToFall.y != FlxG.height - (_blockToFall.row * 16)) // In case the block was not tweened correctly, this will do it once more
 			{
-				_blockToFall.tween = FlxTween.tween(_blockToFall, {y: _blockToFall.y + 16}, 0.1);
+				trace(_blockToFall.selectedColor + " didn't fall correctly");
+				// _blockToFall.tween = FlxTween.tween(_blockToFall, {y: _blockToFall.y + 16}, 0.1);
 			}
 		}
 	}
@@ -202,11 +235,5 @@ class Block extends FlxSprite
 			case YELLOW:
 				return AssetPaths.yellow_blocks__png;
 		}
-	}
-
-	function _onTestSignal(_object:FlxSprite)
-	{
-		trace(_object);
-		trace("signal complete");
 	}
 }

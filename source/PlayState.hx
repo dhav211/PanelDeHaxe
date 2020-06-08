@@ -4,6 +4,7 @@ import en.Blocks;
 import en.Cursor;
 import flixel.FlxState;
 import flixel.math.FlxRandom;
+import haxe.Constraints.Function;
 
 class PlayState extends FlxState
 {

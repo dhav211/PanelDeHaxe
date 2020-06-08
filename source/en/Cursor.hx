@@ -30,8 +30,7 @@ class Cursor extends FlxSprite
 		loadGraphic(AssetPaths.cursor__png, false, 16, 16);
 		SetInitalPosition();
 
-		moveComplete.add(_onMoveComplete);
-		move = new MoveCommand(this, moveComplete);
+		move = new MoveCommand(this);
 	}
 
 	public override function update(elapsed:Float)
@@ -87,7 +86,7 @@ class Cursor extends FlxSprite
 
 		if (left && CanMove(left) && !isMoving)
 		{
-			move.StartMove(LEFT, 16, 0.2);
+			move.StartMove(LEFT, 16, 0.2, _onMoveComplete);
 			colLeft--;
 			colRight--;
 			isMoving = true;
@@ -95,7 +94,7 @@ class Cursor extends FlxSprite
 
 		if (right && CanMove(right) && !isMoving)
 		{
-			move.StartMove(RIGHT, 16, 0.2);
+			move.StartMove(RIGHT, 16, 0.2, _onMoveComplete);
 			colLeft++;
 			colRight++;
 			isMoving = true;
@@ -103,62 +102,17 @@ class Cursor extends FlxSprite
 
 		if (down && CanMove(down) && !isMoving)
 		{
-			move.StartMove(DOWN, 16, 0.2);
+			move.StartMove(DOWN, 16, 0.2, _onMoveComplete);
 			row--;
 			isMoving = true;
 		}
 
 		if (up && CanMove(up) && !isMoving)
 		{
-			move.StartMove(UP, 16, 0.2);
+			move.StartMove(UP, 16, 0.2, _onMoveComplete);
 			row++;
 			isMoving = true;
 		}
-		/*
-			THIS WILL BE REMOVED WHEN MOVE COMMAND IS CONFIRMED WORKING. ALL TWEENS WILL BE REMOVED DUE TO LACK OF FLEXIBLITY
-				if (!tween.active)
-				{
-					// Cancel any undesired movements
-					if (left && right)
-						left = right = false;
-					if (up && down)
-						up = down = false;
-					if (left && up)
-						left = up = false;
-					if (left && down)
-						left = down = false;
-					if (right && up)
-						right = up = false;
-					if (right && down)
-						right = down = false;
-
-					if (left && CanMove(left))
-					{
-						tween = FlxTween.tween(this, {x: x - 16}, 0.2);
-						colLeft--;
-						colRight--;
-					}
-
-					if (right && CanMove(right))
-					{
-						tween = FlxTween.tween(this, {x: x + 16}, 0.2);
-						colLeft++;
-						colRight++;
-					}
-
-					if (down && CanMove(down))
-					{
-						tween = FlxTween.tween(this, {y: y + 16}, 0.2);
-						row--;
-					}
-
-					if (up && CanMove(up))
-					{
-						tween = FlxTween.tween(this, {y: y - 16}, 0.2);
-						row++;
-					}
-				}
-		 */
 	}
 
 	function CanMove(_directionPressed:Bool):Bool // Checks if it's in bounds to move in the given direction
@@ -240,9 +194,8 @@ class Cursor extends FlxSprite
 		row = 3;
 	}
 
-	function _onMoveComplete(_object:FlxSprite)
+	function _onMoveComplete()
 	{
-		trace("hey");
 		isMoving = false;
 	}
 }
