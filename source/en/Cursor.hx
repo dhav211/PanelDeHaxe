@@ -50,7 +50,8 @@ class Cursor extends FlxSprite
 			canPress = false;
 
 			if (blocks.grid[colLeft][row] != null)
-				trace("Left: " + blocks.grid[colLeft][row].selectedColor + " at " + colLeft + " - " + row);
+				trace("Left: " + blocks.grid[colLeft][row].selectedColor + " at " + colLeft + " - " + row + "   x: " + blocks.grid[colLeft][row].x + " y: "
+					+ blocks.grid[colLeft][row].y);
 			else
 				trace("Left: NULL " + " at " + colLeft + " - " + row);
 

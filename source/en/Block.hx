@@ -161,12 +161,26 @@ class Block extends FlxSprite
 			_blockToFall.isFalling = false;
 			blocks.CheckForMatches(_blockToFall);
 
-			if (_blockToFall.y != FlxG.height - (_blockToFall.row * 16)) // In case the block was not tweened correctly, this will do it once more
+			if (!DidBlockFallCorrectly(_blockToFall))
+				// For reasons that will forever be unknown to me, at times the block will not fall all the way correctly, it will stop one spot short
+				// of being correct, however the correct position will be updated on the grid.
+				// This method above makes sure that it fell into the right spot and if it didn't then the block will fall one more time to fix the issue.
 			{
-				trace(_blockToFall.selectedColor + " didn't fall correctly");
-				// _blockToFall.tween = FlxTween.tween(_blockToFall, {y: _blockToFall.y + 16}, 0.1);
+				_blockToFall.isFalling = true;
+				_blockToFall.fall.StartMove(DOWN, 16, 0.1, _onFallComplete.bind(_blockToFall));
+				trace("Block didn't fall correctly, correct the issue");
 			}
 		}
+	}
+
+	function DidBlockFallCorrectly(_blockToFall:Block):Bool
+	{
+		var distance:Float = (FlxG.height - (_blockToFall.row * 16)) - _blockToFall.y;
+
+		if (distance > 16)
+			return false;
+		else
+			return true;
 	}
 
 	public function FallAboveBlocks(_originalCol:Int, _originalRow:Int)

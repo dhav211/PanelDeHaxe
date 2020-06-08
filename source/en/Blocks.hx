@@ -33,7 +33,7 @@ class Blocks extends FlxTypedGroup<Block>
 
 		random = _random;
 		grid = CreateEmptyGrid();
-		// timer.start(60 / speed);
+		timer.start(60 / speed);
 	}
 
 	public override function update(elapsed:Float)
