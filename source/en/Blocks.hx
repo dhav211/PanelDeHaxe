@@ -7,6 +7,7 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxSignal;
 import flixel.util.FlxTimer;
+import ui.Stats;
 
 class Blocks extends FlxTypedGroup<Block>
 {
@@ -15,23 +16,33 @@ class Blocks extends FlxTypedGroup<Block>
 	public final GRID_WIDTH:Int = 6;
 	public final GRID_HEIGHT:Int = 14;
 
+	final INITIAL_SPEED:Int = 100;
 	var speed:Float = 100;
+	var speedLevel:Int = 1;
+	var currentSpeedIncrement:Int = 0;
+	var chain:Int = 0;
 
-	var currentIncrement:Int = 0;
+	public var currentIncrement(default, null):Int = 0;
+
+	final MAX_SPEED_INCREMENT:Int = 5;
 	final MAX_INCREMENT:Int = 16;
+	final SPEED_INCREASE_AMOUNT = 30;
 
 	var timer:FlxTimer = new FlxTimer();
 	var tween:FlxTween;
 	var random:FlxRandom;
+	var score:Score;
 
 	var moveCursorUp:FlxSignal = new FlxSignal();
 	var increaseCursorRow:FlxSignal = new FlxSignal();
+	var updateLevel:FlxTypedSignal<Int->Void> = new FlxTypedSignal<Int->Void>();
 
-	public function new(_random:FlxRandom)
+	public function new(_random:FlxRandom, _score:Score)
 	{
 		super();
 
 		random = _random;
+		score = _score;
 		grid = CreateEmptyGrid();
 		timer.start(60 / speed);
 	}
@@ -50,6 +61,15 @@ class Blocks extends FlxTypedGroup<Block>
 				SpawnRow();
 				increaseCursorRow.dispatch();
 				currentIncrement = 0;
+				currentSpeedIncrement++;
+
+				if (currentSpeedIncrement == MAX_SPEED_INCREMENT)
+				{
+					speed += SPEED_INCREASE_AMOUNT;
+					speedLevel++;
+					updateLevel.dispatch(speedLevel);
+					trace("speed has increased");
+				}
 			}
 		}
 
@@ -104,13 +124,16 @@ class Blocks extends FlxTypedGroup<Block>
 
 		if (verticalMatches.length > 1 || horizonalMatches.length > 1)
 		{
+			var blocksMatched:Int = 0;
 			_originBlock.kill();
+			blocksMatched++;
 
 			if (verticalMatches.length > 1)
 			{
 				for (match in verticalMatches)
 				{
 					match.kill();
+					blocksMatched++;
 				}
 			}
 
@@ -119,8 +142,21 @@ class Blocks extends FlxTypedGroup<Block>
 				for (match in horizonalMatches)
 				{
 					match.kill();
+					blocksMatched++;
 				}
 			}
+
+			// The score from this match will be added
+			score.CalculateScore(blocksMatched, chain);
+			chain++;
+
+			if (chain > 1)
+				trace("the current chain is " + chain);
+		}
+		else
+		{
+			// No matches were found, so break the chain
+			chain = 0;
 		}
 	}
 
@@ -251,6 +287,12 @@ class Blocks extends FlxTypedGroup<Block>
 		var emptyBlock:Block = null;
 		var tempGrid:Array<Array<Block>> = [for (x in 0...GRID_WIDTH) [for (y in 0...GRID_HEIGHT) emptyBlock]];
 		return tempGrid;
+	}
+
+	public function SetStatsSignals(_stats:Stats)
+	{
+		score.updateScore.add(_stats._onUpdateScore);
+		updateLevel.add(_stats._onUpdateLevel);
 	}
 
 	public function SetCursor(_cursor:Cursor)

@@ -19,7 +19,7 @@ class ApplicationMain
 
 		#if (js && html5)
 		#if (munit || utest)
-		lime.system.System.embed("PanelDeHaxe", null, 1024, 896);
+		lime.system.System.embed("PanelDeHaxe", null, 704, 896);
 		#end
 		#else
 		create(null);
@@ -32,7 +32,7 @@ class ApplicationMain
 
 		ManifestResources.init(config);
 
-		app.meta["build"] = "6";
+		app.meta["build"] = "7";
 		app.meta["company"] = "HaxeFlixel";
 		app.meta["file"] = "PanelDeHaxe";
 		app.meta["name"] = "PanelDeHaxe";
@@ -58,7 +58,7 @@ class ApplicationMain
 			parameters: {},
 			resizable: false,
 			title: "PanelDeHaxe",
-			width: 1024,
+			width: 704,
 			x: null,
 			y: null,
 		};

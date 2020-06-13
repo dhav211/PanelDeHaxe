@@ -138,6 +138,7 @@ class Block extends FlxSprite
 
 	function Fall(_blockToFall:Block)
 	{
+		// trace(_blockToFall.selectedColor + " is falling");
 		var fallTime:Float = 0;
 		var fallDistance:Int = 1;
 
@@ -168,14 +169,15 @@ class Block extends FlxSprite
 			{
 				_blockToFall.isFalling = true;
 				_blockToFall.fall.StartMove(DOWN, 16, 0.1, _onFallComplete.bind(_blockToFall));
-				trace("Block didn't fall correctly, correct the issue");
 			}
 		}
 	}
 
+	function _onFallCheckTimerComplete(_timer:FlxTimer) {}
+
 	function DidBlockFallCorrectly(_blockToFall:Block):Bool
 	{
-		var distance:Float = (FlxG.height - (_blockToFall.row * 16)) - _blockToFall.y;
+		var distance:Float = ((FlxG.height - (_blockToFall.row * 16) - blocks.currentIncrement)) - _blockToFall.y;
 
 		if (distance > 16)
 			return false;
@@ -196,7 +198,10 @@ class Block extends FlxSprite
 				var blockToFall:Block = blocks.grid[_originalCol][rowToCheck];
 
 				if (CanFall(rowToCheck - 1, _originalCol))
+				{
+					// trace(blockToFall.selectedColor + (" will fall!"));
 					Fall(blockToFall);
+				}
 
 				rowToCheck++; // check to see if there is a block above
 			}
