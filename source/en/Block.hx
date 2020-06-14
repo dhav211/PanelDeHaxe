@@ -49,12 +49,8 @@ class Block extends FlxSprite
 		row = _row;
 		col = _col;
 
-		selectedColor = SetColor();
-		loadGraphic(LoadGraphicBasedOnSelectedColor(), true, 16, 16);
-
-		animation.add("still", [0], 8, true);
-		animation.add("die", [0, 5, 0, 5, 0, 5, 0, 5, 6], 8, false);
-		animation.play("still");
+		selectedColor = SetColor(random.int(0, 6));
+		SetGraphicAndAnimations();
 
 		swap = new MoveCommand(this);
 		fall = new MoveCommand(this);
@@ -213,12 +209,11 @@ class Block extends FlxSprite
 		}
 	}
 
-	function SetColor():Color
+	public function SetColor(_randomChoice:Int):Color
 	{
 		// choose a random number the in the range of Color enums, use number chosen to get color
-		var randomChoice:Int = random.int(0, 6);
 
-		switch (randomChoice)
+		switch (_randomChoice)
 		{
 			case 0:
 				return BLUE;
@@ -253,6 +248,35 @@ class Block extends FlxSprite
 				return AssetPaths.teal_blocks__png;
 			case YELLOW:
 				return AssetPaths.yellow_blocks__png;
+		}
+	}
+
+	public function SetGraphicAndAnimations()
+	{
+		loadGraphic(LoadGraphicBasedOnSelectedColor(), true, 16, 16);
+
+		animation.add("still", [0], 8, true);
+		animation.add("null", [4], 8, true);
+		animation.add("die", [0, 5, 0, 5, 0, 5, 0, 5, 6], 8, false);
+
+		if (row > 0)
+			animation.play("still");
+		else
+			animation.play("null");
+	}
+
+	public function IncreaseRow()
+	{
+		row++;
+
+		if (row == 1)
+		{
+			animation.play("still");
+		}
+
+		if (row == 14)
+		{
+			// dispatch a game over signal
 		}
 	}
 }

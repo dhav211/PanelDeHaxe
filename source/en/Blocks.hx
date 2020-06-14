@@ -4,7 +4,6 @@ import flixel.FlxG;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxRandom;
 import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
 import flixel.util.FlxSignal;
 import flixel.util.FlxTimer;
 import ui.Stats;
@@ -88,6 +87,7 @@ class Blocks extends FlxTypedGroup<Block>
 
 	public function CheckForMatches(_originBlock:Block)
 	{
+		trace("check for matches");
 		var horizonalMatches:Array<Block> = [];
 		var verticalMatches:Array<Block> = [];
 
@@ -241,13 +241,19 @@ class Blocks extends FlxTypedGroup<Block>
 			{
 				if (grid[x][y] != null)
 				{
-					grid[x][y].row++;
+					grid[x][y].IncreaseRow();
 					increasedRowGrid[x][y + 1] = grid[x][y];
 				}
 			}
 		}
 
 		grid = increasedRowGrid;
+
+		// The previously nulled out 0 row is now 1, so check for matches on it the moment it is possible.
+		for (i in 0...GRID_WIDTH)
+		{
+			CheckForMatches(grid[i][1]);
+		}
 	}
 
 	public function SpawnRow()
@@ -258,6 +264,36 @@ class Blocks extends FlxTypedGroup<Block>
 		for (i in 0...6)
 		{
 			var block:Block = new Block(xStartingPosition + (16 * i), yPosition, 0, i, random, this);
+
+			// Within here it will make sure no matches are being formed
+			if (i > 1)
+			{
+				var isCheckingForMatch:Bool = true;
+
+				while (isCheckingForMatch)
+				{
+					// Compare the color of the two blocks to the left of current block
+					var numberOfMatches:Int = 0;
+					for (j in 1...3)
+					{
+						if (grid[i - j][0].selectedColor == block.selectedColor)
+						{
+							numberOfMatches++;
+						}
+					}
+
+					if (numberOfMatches > 1) // if there was a match, change the color and the process will begin again
+					{
+						block.selectedColor = block.SetColor(random.int(0, 6));
+						block.SetGraphicAndAnimations();
+					}
+					else
+					{
+						isCheckingForMatch = false;
+					}
+				}
+			}
+
 			grid[i][0] = block;
 			add(block);
 		}
@@ -265,19 +301,14 @@ class Blocks extends FlxTypedGroup<Block>
 
 	public function SpawnInitalBlocks()
 	{
-		var random:FlxRandom = new FlxRandom();
-		var yStartingPosition:Float = FlxG.height;
-		var xStartingPosition:Float = 16;
+		grid = GridBuilder.GetInitialBricks(grid, this, random);
 
-		for (i in 0...6)
+		for (i in 0...GRID_WIDTH)
 		{
-			var rowHeight:Int = random.int(4, 8);
-
-			for (j in 0...rowHeight)
+			for (j in 0...GRID_HEIGHT)
 			{
-				var block:Block = new Block(xStartingPosition + (16 * i), yStartingPosition - (16 * j), j, i, random, this);
-				grid[i][j] = block;
-				add(block);
+				if (grid[i][j] != null)
+					add(grid[i][j]);
 			}
 		}
 	}

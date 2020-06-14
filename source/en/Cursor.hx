@@ -149,22 +149,28 @@ class Cursor extends FlxSprite
 			leftBlock = blocks.grid[colLeft][row];
 			rightBlock = blocks.grid[colRight][row];
 
-			if (leftBlock != null)
+			if (leftBlock != null && leftBlock.alive)
 			{
-				leftBlock.Swap(1);
-				blocks.grid[colRight][row] = leftBlock;
+				if ((rightBlock != null && rightBlock.alive) || rightBlock == null)
+				{
+					leftBlock.Swap(1);
+					blocks.grid[colRight][row] = leftBlock;
+				}
 			}
-			else
+			else if (leftBlock == null)
 			{
 				blocks.grid[colRight][row] = null;
 			}
 
-			if (rightBlock != null)
+			if (rightBlock != null && rightBlock.alive)
 			{
-				rightBlock.Swap(-1);
-				blocks.grid[colLeft][row] = rightBlock;
+				if ((leftBlock != null && leftBlock.alive) || leftBlock == null)
+				{
+					rightBlock.Swap(-1);
+					blocks.grid[colLeft][row] = rightBlock;
+				}
 			}
-			else
+			else if (rightBlock == null)
 			{
 				blocks.grid[colLeft][row] = null;
 			}
