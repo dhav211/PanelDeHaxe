@@ -30,7 +30,7 @@
 --remap flash:openfl
 --macro flixel.system.macros.FlxDefines.run()
 --connect
-6001
+6000
 -cp export/hl/haxe
 -hl export/hl/obj/ApplicationMain.hl
 --macro keep("Main")

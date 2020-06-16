@@ -87,7 +87,6 @@ class Blocks extends FlxTypedGroup<Block>
 
 	public function CheckForMatches(_originBlock:Block)
 	{
-		trace("check for matches");
 		var horizonalMatches:Array<Block> = [];
 		var verticalMatches:Array<Block> = [];
 

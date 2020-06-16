@@ -135,16 +135,28 @@ class Block extends FlxSprite
 	function Fall(_blockToFall:Block)
 	{
 		// trace(_blockToFall.selectedColor + " is falling");
-		var fallTime:Float = 0;
 		var fallDistance:Int = 1;
 
 		blocks.RemoveBlockInGrid(_blockToFall.col, _blockToFall.row); // null out the original spot for the block so it won't be referenced here in grid
 
-		fallTime = 0.1 * fallDistance;
+		var isGettingFallDistance:Bool = true;
+
+		while (isGettingFallDistance)
+		{
+			if (CanFall(_blockToFall.row - (fallDistance + 1), _blockToFall.col))
+			{
+				fallDistance++;
+			}
+			else
+			{
+				isGettingFallDistance = false;
+			}
+		}
+
 		_blockToFall.row -= fallDistance;
 
 		_blockToFall.isFalling = true;
-		_blockToFall.fall.StartMove(DOWN, 16, 0.1, _onFallComplete.bind(_blockToFall));
+		_blockToFall.fall.StartMove(DOWN, fallDistance * 16, 0.1, _onFallComplete.bind(_blockToFall));
 
 		blocks.SetBlockInGrid(_blockToFall.col, _blockToFall.row, _blockToFall); // make reference of this block in the new fallen location
 	}
@@ -157,6 +169,7 @@ class Block extends FlxSprite
 		{
 			_blockToFall.isFalling = false;
 			blocks.CheckForMatches(_blockToFall);
+			_blockToFall.animation.play("fall_bounce");
 
 			if (!DidBlockFallCorrectly(_blockToFall))
 				// For reasons that will forever be unknown to me, at times the block will not fall all the way correctly, it will stop one spot short
@@ -258,6 +271,7 @@ class Block extends FlxSprite
 		animation.add("still", [0], 8, true);
 		animation.add("null", [4], 8, true);
 		animation.add("die", [0, 5, 0, 5, 0, 5, 0, 5, 6], 8, false);
+		animation.add("fall_bounce", [3, 0, 1, 2, 1, 0], 8, false);
 
 		if (row > 0)
 			animation.play("still");

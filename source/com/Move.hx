@@ -54,7 +54,9 @@ class MoveCommand
 
 	public function StartMove(_direction:Direction, _distance:Int, _duration:Float, _onComplete:Function)
 	{
-		moveSpeed = 10 / _duration;
+		var tileDistance:Int = Std.int(_distance / 16);
+
+		moveSpeed = (10 / _duration) * tileDistance;
 		distance = _distance;
 		currentDirection = _direction;
 		onComplete = _onComplete;
