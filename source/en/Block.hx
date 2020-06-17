@@ -30,8 +30,10 @@ class Block extends FlxSprite
 
 	var blocks:Blocks;
 	var fallSpeed:Float = 50;
-	var isFalling:Bool = false;
 	var isSwapping:Bool = false;
+
+	public var isFalling(default, null):Bool = false;
+	public var isInDanger(default, default):Bool = false;
 
 	var random:FlxRandom;
 	var tween:FlxTween;
@@ -76,6 +78,7 @@ class Block extends FlxSprite
 		col += _moveDirection;
 		isSwapping = true;
 		var direction:Direction = LEFT;
+		blocks.CheckForColumnsInDanger(); // TODO Maybe not best place do to this since it will be called twice
 
 		switch (_moveDirection)
 		{
@@ -169,7 +172,10 @@ class Block extends FlxSprite
 		{
 			_blockToFall.isFalling = false;
 			blocks.CheckForMatches(_blockToFall);
-			_blockToFall.animation.play("fall_bounce");
+			blocks.CheckForColumnsInDanger();
+
+			if (_blockToFall.alive)
+				_blockToFall.animation.play("fall_bounce");
 
 			if (!DidBlockFallCorrectly(_blockToFall))
 				// For reasons that will forever be unknown to me, at times the block will not fall all the way correctly, it will stop one spot short
@@ -272,6 +278,7 @@ class Block extends FlxSprite
 		animation.add("null", [4], 8, true);
 		animation.add("die", [0, 5, 0, 5, 0, 5, 0, 5, 6], 8, false);
 		animation.add("fall_bounce", [3, 0, 1, 2, 1, 0], 8, false);
+		animation.add("danger_bounce", [3, 0, 1, 2, 1, 0], 8, true); // Same as fall bounce but loops
 
 		if (row > 0)
 			animation.play("still");

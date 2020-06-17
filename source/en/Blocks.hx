@@ -58,6 +58,7 @@ class Blocks extends FlxTypedGroup<Block>
 			{
 				IncreaseBlocksRowCount();
 				SpawnRow();
+				CheckForColumnsInDanger();
 				increaseCursorRow.dispatch();
 				currentIncrement = 0;
 				currentSpeedIncrement++;
@@ -308,6 +309,46 @@ class Blocks extends FlxTypedGroup<Block>
 			{
 				if (grid[i][j] != null)
 					add(grid[i][j]);
+			}
+		}
+	}
+
+	public function CheckForColumnsInDanger()
+	{
+		var dangerRowHeight:Int = 10;
+		for (col in 0...GRID_WIDTH)
+		{
+			var colIsInDanger:Bool = false;
+
+			for (row in 0...GRID_HEIGHT)
+			{
+				if (row == dangerRowHeight && grid[col][row] != null)
+					colIsInDanger = true;
+			}
+
+			if (colIsInDanger)
+			{
+				for (row in 0...GRID_HEIGHT)
+				{
+					if (grid[col][row] != null)
+						if (grid[col][row].alive)
+						{
+							grid[col][row].animation.play("danger_bounce");
+						}
+				}
+			}
+			else
+			{
+				for (row in 0...GRID_HEIGHT)
+				{
+					if (grid[col][row] != null)
+					{
+						if (row > 0 && grid[col][row].alive)
+							grid[col][row].animation.play("still");
+						else if (row == 0 && grid[col][row].alive)
+							grid[col][row].animation.play("null");
+					}
+				}
 			}
 		}
 	}
