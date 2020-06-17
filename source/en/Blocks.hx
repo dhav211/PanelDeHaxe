@@ -343,7 +343,7 @@ class Blocks extends FlxTypedGroup<Block>
 				{
 					if (grid[col][row] != null)
 					{
-						if (row > 0 && grid[col][row].alive)
+						if (row > 0 && grid[col][row].alive && grid[col][row].animation.name != "fall_bounce")
 							grid[col][row].animation.play("still");
 						else if (row == 0 && grid[col][row].alive)
 							grid[col][row].animation.play("null");
