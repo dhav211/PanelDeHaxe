@@ -69,4 +69,9 @@ class Score
 		score += scoreToAdd;
 		updateScore.dispatch(score);
 	}
+
+	public function ClearScore()
+	{
+		score = 0;
+	}
 }

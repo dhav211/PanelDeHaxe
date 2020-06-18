@@ -6,6 +6,7 @@ import flixel.math.FlxRandom;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxSignal;
 import flixel.util.FlxTimer;
+import ui.GameOver;
 import ui.Stats;
 
 class Blocks extends FlxTypedGroup<Block>
@@ -15,7 +16,7 @@ class Blocks extends FlxTypedGroup<Block>
 	public final GRID_WIDTH:Int = 6;
 	public final GRID_HEIGHT:Int = 14;
 
-	final INITIAL_SPEED:Int = 100;
+	final INITIAL_SPEED:Int = 800;
 	var speed:Float = 100;
 	var speedLevel:Int = 1;
 	var currentSpeedIncrement:Int = 0;
@@ -35,6 +36,8 @@ class Blocks extends FlxTypedGroup<Block>
 	var moveCursorUp:FlxSignal = new FlxSignal();
 	var increaseCursorRow:FlxSignal = new FlxSignal();
 	var updateLevel:FlxTypedSignal<Int->Void> = new FlxTypedSignal<Int->Void>();
+
+	public var startGameOver(default, null):FlxSignal = new FlxSignal();
 
 	public function new(_random:FlxRandom, _score:Score)
 	{
@@ -68,7 +71,6 @@ class Blocks extends FlxTypedGroup<Block>
 					speed += SPEED_INCREASE_AMOUNT;
 					speedLevel++;
 					updateLevel.dispatch(speedLevel);
-					trace("speed has increased");
 				}
 			}
 		}
@@ -328,7 +330,7 @@ class Blocks extends FlxTypedGroup<Block>
 
 			if (colIsInDanger)
 			{
-				for (row in 0...GRID_HEIGHT)
+				for (row in 1...GRID_HEIGHT)
 				{
 					if (grid[col][row] != null)
 						if (grid[col][row].alive)
@@ -339,31 +341,50 @@ class Blocks extends FlxTypedGroup<Block>
 			}
 			else
 			{
-				for (row in 0...GRID_HEIGHT)
+				for (row in 1...GRID_HEIGHT)
 				{
-					if (grid[col][row] != null)
+					if (grid[col][row] != null && grid[col][row].alive && grid[col][row].animation.name != "fall_bounce")
 					{
-						if (row > 0 && grid[col][row].alive && grid[col][row].animation.name != "fall_bounce")
-							grid[col][row].animation.play("still");
-						else if (row == 0 && grid[col][row].alive)
-							grid[col][row].animation.play("null");
+						grid[col][row].animation.play("still");
 					}
 				}
 			}
 		}
 	}
 
-	function CreateEmptyGrid():Array<Array<Block>>
+	public function CreateEmptyGrid():Array<Array<Block>>
 	{
 		var emptyBlock:Block = null;
 		var tempGrid:Array<Array<Block>> = [for (x in 0...GRID_WIDTH) [for (y in 0...GRID_HEIGHT) emptyBlock]];
 		return tempGrid;
 	}
 
+	public function StartGame()
+	{
+		SpawnInitalBlocks();
+
+		speed = INITIAL_SPEED;
+		speedLevel = 1;
+		score.ClearScore();
+
+		score.updateScore.dispatch(0);
+		updateLevel.dispatch(speedLevel);
+	}
+
+	public function StopGame()
+	{
+		speed = 0;
+	}
+
 	public function SetStatsSignals(_stats:Stats)
 	{
 		score.updateScore.add(_stats._onUpdateScore);
 		updateLevel.add(_stats._onUpdateLevel);
+	}
+
+	public function SetGameOverSignal(_gameOver:GameOver)
+	{
+		startGameOver.add(_gameOver._onStartGameOver);
 	}
 
 	public function SetCursor(_cursor:Cursor)

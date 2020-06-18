@@ -297,7 +297,7 @@ class Block extends FlxSprite
 
 		if (row == 14)
 		{
-			// dispatch a game over signal
+			blocks.startGameOver.dispatch();
 		}
 	}
 }

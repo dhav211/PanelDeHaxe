@@ -12,9 +12,6 @@ class Cursor extends FlxSprite
 	public var colLeft:Int = 0;
 	public var colRight:Int = 0;
 
-	var xPosModifier:Float = 2;
-	var yPosModifier:Float = 2;
-
 	var canPress:Bool = true;
 	var isMoving:Bool = false;
 
@@ -35,12 +32,15 @@ class Cursor extends FlxSprite
 
 	public override function update(elapsed:Float)
 	{
-		if (isMoving)
-			move.Move(elapsed);
+		if (visible)
+		{
+			if (isMoving)
+				move.Move(elapsed);
 
-		Move();
-		SwapBlocks();
-		GetBlockColors();
+			Move();
+			SwapBlocks();
+			GetBlockColors();
+		}
 	}
 
 	function GetBlockColors() // Debug
@@ -192,10 +192,9 @@ class Cursor extends FlxSprite
 		row++;
 	}
 
-	function SetInitalPosition()
+	public function SetInitalPosition()
 	{
-		var startingBlock:Block = blocks.grid[2][3];
-		setPosition(startingBlock.x - xPosModifier, startingBlock.y - yPosModifier);
+		setPosition(46, 174);
 		colLeft = 2;
 		colRight = 3;
 		row = 3;
